@@ -14,17 +14,18 @@ The rules are:
 
 Author: Spencer Fretwell
 Date: 2024-10-11
-Version: 0.2
+Version: 0.3
 """
 
 import sys
 import os.path as op
 from os import mkdir
 
-from datalad.distribution.dataset import require_dataset
+from datalad.distribution.dataset import require_dataset, Dataset
 from datalad.utils import create_tree
 
 ds = require_dataset(sys.argv[1], check_installed=True, purpose="Nonbinary to git")
+assert isinstance(ds, Dataset), "No dataset found"
 assert ds.repo is not None, "No datalad repo found"
 
 annex_largefiles = "(((mimeencoding=binary)and(largerthan=1b))or(largerthan=100kb))"
@@ -33,27 +34,39 @@ annex_backend = "MD5E"
 #: I am just adding the lines I want directly because I know the (global) setup I am working with.
 ds.repo.set_gitattributes(
     [
-        ("*", {"annex.largefiles": annex_largefiles}),
         ("*", {"annex.backend": annex_backend}),
-        ("in/**", {"annex.largefiles": "anything"}),
-        ("out/**", {"annex.largefiles": "anything"}),
+        ("*", {"annex.largefiles": annex_largefiles}),
     ]
 )
 
 #: write the gitattributes file (makes folders if not present)
+attr_folders = ["in", "out", "src"]
 [
     ds.repo.set_gitattributes(
         [
             ("*", {"annex.largefiles": "anything"}),
+            (".gitattributes", {"annex.largefiles": "nothing"}),
         ],
         f"{folder}/.gitattributes",
     )
-    for folder in ["in", "out"]
+    for folder in attr_folders
 ]
 
-git_attributes_file = op.join(ds.path, ".gitattributes")
+#: Create remaining folders (if not present)
+for folder in ["code", "docs", "envs", "refs", "dev"]:
+    if not op.exists(op.join(ds.path, folder)):
+        mkdir(op.join(ds.path, folder))
+
+#: Ignore anything within the dev folder or that has dev in the name
+with open(op.join(ds.path, ".gitignore"), "a+") as f:
+    f.write("dev/\n*dev*\n**/dev/\n")
+
+modfiles = [
+    op.join(ds.path, ".gitattributes"),
+    op.join(ds.path, ".gitignore"),
+] + [op.join(ds.path, folder, ".gitattributes") for folder in attr_folders]
 ds.save(
-    git_attributes_file,
-    message="Set up a project repo per convention\n\ninitVersion:: 0.2\nprojectConventionVersion:: 0.1",
+    modfiles,
+    message="Set up a project repo per convention\n\ninitVersion:: 0.3\nprojectConventionVersion:: 0.1",
     result_renderer="disabled",
 )
