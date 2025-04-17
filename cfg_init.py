@@ -15,8 +15,8 @@ The rules are:
     - Could set to 100 MB to mimic GitHub's limits?
 
 Author: Spencer Fretwell
-Date: 2025-04-16
-Version: 0.5
+Date: 2025-05-06
+Version: 0.6
 """
 
 import sys
@@ -40,24 +40,31 @@ ds.repo.set_gitattributes(
         ("*", {"annex.largefiles": annex_largefiles}),
         (".git*", {"annex.largefiles": "nothing"}),
         ("**/.git*", {"annex.largefiles": "nothing"}),
+        ("code/**", {"annex.largefiles": "nothing"}),
+        ("docs/**", {"annex.largefiles": "nothing"}),
+        ("envs/**", {"annex.largefiles": "nothing"}),
+        ("in/**", {"annex.largefiles": "anything"}),
+        ("out/**", {"annex.largefiles": "anything"}),
+        ("bin/**", {"annex.largefiles": "anything"}),
+        ("**/bin/**", {"annex.largefiles": "anything"}),
     ]
 )
 
 #: write the gitattributes file (makes folders if not present)
-attr_folders = ["in", "out", "bin"]
-[
-    ds.repo.set_gitattributes(
-        [
-            ("*", {"annex.largefiles": "anything"}),
-            (".gitattributes", {"annex.largefiles": "nothing"}),
-        ],
-        f"{folder}/.gitattributes",
-    )
-    for folder in attr_folders
-]
+# attr_folders = ["in", "out", "bin"]
+# [
+#     ds.repo.set_gitattributes(
+#         [
+#             ("*", {"annex.largefiles": "anything"}),
+#             (".gitattributes", {"annex.largefiles": "nothing"}),
+#         ],
+#         f"{folder}/.gitattributes",
+#     )
+#     for folder in attr_folders
+# ]
 
 #: Create remaining folders (if not present)
-for folder in ["code", "docs", "envs", "refs", "dev"]:
+for folder in ["in", "out", "bin", "code", "docs", "envs"]:
     if not op.exists(op.join(ds.path, folder)):
         mkdir(op.join(ds.path, folder))
 
@@ -68,9 +75,9 @@ with open(op.join(ds.path, ".gitignore"), "a+") as f:
 modfiles = [
     op.join(ds.path, ".gitattributes"),
     op.join(ds.path, ".gitignore"),
-] + [op.join(ds.path, folder, ".gitattributes") for folder in attr_folders]
+]
 ds.save(
     modfiles,
-    message="Set up a project repo per convention\n\ninitVersion:: 0.4\nprojectConventionVersion:: 0.12",
+    message="Set up a project repo per convention\n\ninitVersion:: 0.6\nprojectConventionVersion:: 0.13",
     result_renderer="disabled",
 )
