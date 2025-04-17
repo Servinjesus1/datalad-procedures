@@ -1,0 +1,4 @@
+* annex.backend=MD5E
+* annex.largefiles=(((mimeencoding=binary)and(largerthan=1b))or(largerthan=100kb))
+.git* annex.largefiles=nothing
+**/.git* annex.largefiles=nothing

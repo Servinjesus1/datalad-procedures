@@ -4,7 +4,9 @@
 Based on txt2git, this adds lines to the .gitattribute file to track text in git
 and most everything else in git-annex.
 
-See [[Project-Naming-Convention]] for rationale involving rules associated with project structure.
+See [Project Naming Convention](../../../0-Vaults/0-Meta/3STD-Standards/Project-Naming-Convention.md) for rationale involving rules associated with project structure.
+See root.gitattributes for an example of the attributes file this produces in root.
+See annexDir.gitattributes for an example of the attributes file for annex-only directories (e.g., in, out, src).
 
 The rules are:
 - Use MD5E backend (MD5 hash is smaller + file extension (past the FIRST dot lol))
@@ -13,8 +15,8 @@ The rules are:
     - Could set to 100 MB to mimic GitHub's limits?
 
 Author: Spencer Fretwell
-Date: 2024-10-11
-Version: 0.3
+Date: 2025-04-16
+Version: 0.5
 """
 
 import sys
@@ -36,11 +38,13 @@ ds.repo.set_gitattributes(
     [
         ("*", {"annex.backend": annex_backend}),
         ("*", {"annex.largefiles": annex_largefiles}),
+        (".git*", {"annex.largefiles": "nothing"}),
+        ("**/.git*", {"annex.largefiles": "nothing"}),
     ]
 )
 
 #: write the gitattributes file (makes folders if not present)
-attr_folders = ["in", "out", "src"]
+attr_folders = ["in", "out", "bin"]
 [
     ds.repo.set_gitattributes(
         [
@@ -67,6 +71,6 @@ modfiles = [
 ] + [op.join(ds.path, folder, ".gitattributes") for folder in attr_folders]
 ds.save(
     modfiles,
-    message="Set up a project repo per convention\n\ninitVersion:: 0.3\nprojectConventionVersion:: 0.1",
+    message="Set up a project repo per convention\n\ninitVersion:: 0.4\nprojectConventionVersion:: 0.12",
     result_renderer="disabled",
 )

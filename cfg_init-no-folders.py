@@ -5,8 +5,8 @@ Based on txt2git, this adds lines to the .gitattribute file to track text in git
 and most everything else in git-annex.
 
 Author: Spencer Fretwell
-Date: 2025-02-24
-Version: 0.1
+Date: 2025-03-25
+Version: 0.2
 """
 
 import sys
@@ -28,6 +28,8 @@ ds.repo.set_gitattributes(
     [
         ("*", {"annex.backend": annex_backend}),
         ("*", {"annex.largefiles": annex_largefiles}),
+        (".git*", {"annex.largefiles": "nothing"}),
+        ("**/.git*", {"annex.largefiles": "nothing"}),
     ]
 )
 
@@ -37,6 +39,6 @@ modfiles = [
 ]
 ds.save(
     modfiles,
-    message="Set up a generic repo per convention\n\ninitNoFoldersVersion:: 0.1",
+    message="Set up a generic repo per convention\n\ninitNoFoldersVersion:: 0.2",
     result_renderer="disabled",
 )
